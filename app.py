@@ -1,7 +1,42 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File, Form
+from transformers import pipeline
+from itertools import cycle
+import asyncio, shutil, os,tempfile, torch
 
 
 app = FastAPI()
+
+# Reserves 2 spots on VRAM
+instanceNumber = 2
+
+# pipeline
+models = [
+    pipeline("automatic-speech-recognition", model= "NbAiLab/nb-whisper-large", torch_dtype=torch.float16,device="cuda",
+             chunk_length_s=28,generate_kwargs={'task': 'transcribe', 'language': 'no', "num_beams":1} )
+             for _ in range(instanceNumber)
+]
+
+modelPool = cycle(models)
+
+poolLock = asyncio.Semaphore(instanceNumber)
+
+@app.post("/v1/audio/transcriptions/")
+async def transcribe(
+    file: UploadFile = File(...),
+    model: str = Form(default ="nb-whisper-large")
+):
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".audio") as tmp:
+        shutil.copyfileobj(file.file, tmp)
+        tmpPath = tmp.name
+    try: 
+        async with poolLock:
+            asr = next(modelPool)
+            result = await asyncio.to_thread(asr, tmpPath)
+    finally:
+        os.unlink(tmpPath)
+    
+    return {"text": result["text"].strip()}
+
 
 @app.get("/health")
 def health_check():
