@@ -26,7 +26,8 @@ async def transcribe(
     file: UploadFile = File(...),
     model: str = Form(default ="nb-whisper-large")
 ):
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp:
+    format = os.path.splitext(file.filename)[1] or ".wav"
+    with tempfile.NamedTemporaryFile(delete=False, suffix=format) as tmp:
         shutil.copyfileobj(file.file, tmp)
         tmpPath = tmp.name
     try: 
