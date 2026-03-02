@@ -2,7 +2,7 @@ services:
   whisper-api:
     build: .
     ports:
-      - "8765:8000"
+      - "127.0.0.0:8765:8000"
     volumes:
       - model_cache:/root/.cache/huggingface
     deploy:
