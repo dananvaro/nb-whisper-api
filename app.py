@@ -11,7 +11,7 @@ instanceNumber = 2
 
 # Pipeline
 models = [
-    pipeline("automatic-speech-recognition", model= "NbAiLab/nb-whisper-large", torch_dtype=torch.float16,device="cuda",
+    pipeline("automatic-speech-recognition", model= "NbAiLab/nb-whisper-large", dtype=torch.float16,device="cuda",
              chunk_length_s=28,ignore_warning=True,generate_kwargs={'task': 'transcribe', 'language': 'no', "num_beams":1} )
              # Creates more instances for holding queue
              for _ in range(instanceNumber)
