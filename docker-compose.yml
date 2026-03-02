@@ -2,9 +2,11 @@ services:
   whisper-api:
     build: .
     ports:
-      - "127.0.0.0:8765:8000"
+      - "127.0.0.1:8765:8000"
     volumes:
       - model_cache:/root/.cache/huggingface
+    networks:
+      - ai-patients-network
     deploy:
       resources:
         reservations:
@@ -12,5 +14,9 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+
+networks:
+  ai-patients-network:
+    external: true
 volumes:
   model_cache:
