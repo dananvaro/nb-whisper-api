@@ -21,7 +21,7 @@ modelPool = cycle(models)
 
 poolLock = asyncio.Semaphore(instanceNumber)
 
-@app.post("/v1/audio/transcriptions/")
+@app.post("/v1/audio/transcriptions")
 async def transcribe(
     file: UploadFile = File(...),
     model: str = Form(default ="nb-whisper-large")
